@@ -246,18 +246,16 @@ class JDWrapper(object):
 		33 : on sale, 
 		34 : out of stock
 		'''
-		stock_url = 'http://c0.3.cn/stock'
+		# http://ss.jd.com/ss/areaStockState/mget?app=cart_pc&ch=1&skuNum=3180350,1&area=1,72,2799,0
+		#   response: {"3180350":{"a":"34","b":"1","c":"-1"}}
+		stock_url = 'http://ss.jd.com/ss/areaStockState/mget' 
 		payload = {
-			'ch' :  1,
-			'pduid' : '350068553',
-			'skuId' : stock_id,
-			'venderId' : 0,
-			'cat' : '652,12345,12347',
-			'area': '1_72_4137_0',
-			'buyNum': 1,
-			'extraParam' : r'{"originid":"1"}',
+			'ch' : 1,
+			'app' : 'cart_pc',
+			'area' : '1,72,2799,0', # area change as needed
+			'skuNum' : stock_id + ',' + str(good_count),
 		}
-
+		
 		try:
 			# get stock state
 			resp = self.sess.get(stock_url, params=payload)
@@ -267,7 +265,7 @@ class JDWrapper(object):
 
 			# return json
 			stock_info = json.loads(resp.text)
-			stock_stat = int(stock_info['stock']['StockState'])
+			stock_stat = int(stock_info[stock_id]['a'])
 			
 			# 33 : on sale, 34 : out of stock
 			return stock_stat
@@ -571,7 +569,7 @@ if __name__ == '__main__':
 
 	if options.password == '' or options.username == '':
 		print u'请输入用户名密码'
-		return
+		exit(1)
 
 	jd = JDWrapper(options.username, options.password)
 	jd.login_try()
