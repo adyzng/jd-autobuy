@@ -177,6 +177,7 @@ class JDWrapper(object):
 		print u'{0} > 登陆'.format(time.ctime())
 
 		try:
+			# 2016/09/17 PhantomJS can't login anymore
 			self.browser.get(self.home)
 			soup = bs4.BeautifulSoup(self.browser.page_source, "html.parser")
 			
@@ -187,13 +188,13 @@ class JDWrapper(object):
 			#for (k, v) in self.sess.cookies.items():
 			#	print '%s: %s' % (k, v)
 				
-			# response data hidden input == 9
+			# response data hidden input == 9 ??. Changed 
 			inputs = soup.select('form#formlogin input[type=hidden]')
-			rand_name = inputs[8]['name']
-			rand_data = inputs[8]['value']
+			rand_name = inputs[-1]['name']
+			rand_data = inputs[-1]['value']
 			token = ''
 
-			for idx in range(8):
+			for idx in range(len(inputs) - 1):
 				id = inputs[idx]['id']
 				va = inputs[idx]['value']
 				if   id == 'token':
@@ -207,7 +208,7 @@ class JDWrapper(object):
 			
 			auth_code = ''
 			if self.need_auth_code(self.usr_name):
-				auth_code = self.get_auth_code(uuid)	
+				auth_code = self.get_auth_code(self.uuid)	
 			else:
 				print u'无验证码登陆'
 			
