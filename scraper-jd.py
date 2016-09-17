@@ -241,7 +241,7 @@ class JDWrapper(object):
 		return False
 
 	
-	def good_stock(self, stock_id):
+	def good_stock(self, stock_id, good_count=1):
 		'''
 		33 : on sale, 
 		34 : out of stock
@@ -417,7 +417,7 @@ class JDWrapper(object):
 			'promoID':'0',
 			'outSkus': '',
 			'random': random.random(),
-			'locationId':'1-72-2799-0',
+			'locationId':'1-72-2799-0',  # need changed to your area location id
 		}
 
 		try:
