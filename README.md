@@ -12,6 +12,7 @@ Python 2.7
 ## 第三方库
 - [Requests][3]: 简单好用，功能强大的Http请求库。唯一的一个非转基因的Python HTTP库，人类可以安全享用。
 - [selenium][4]: 一个浏览器自动化测试工具。本例主要用来执行PhantomJS，模拟登陆用。
+- [beautifulsoup4][5]: HTML文档格式化及便签选择器
 
 Requests库只能爬静态页面，京东登录有时需验证码，有时不需要，而且证码验证码是靠JS动态生成，比较复杂尚未研究清楚。
 所以需要一个能执行JS的容器，来模拟登陆，登陆之后的其他请求使用Requests库来操作。<br/>
@@ -24,6 +25,7 @@ Requests库只能爬静态页面，京东登录有时需验证码，有时不需
 ``` Python
 pip install requests
 pip install selenium
+pip install beautifulsoup4
 ```
 
 PhantomJS是一个可执行文件，下载下来解压到%PATH%目录下，或者跟python.exe同级也行。
@@ -92,10 +94,11 @@ Thu Aug 11 23:51:38 2016 > 订单详情
 
 ## 注
 代码仅供学习之用，京东网页不断变化，代码并不一定总是能正常运行。<br/>
-如果您发现有Bug，Welcome to Pull You Code.
+如果您发现有Bug，Welcome to Pull Request.
 
 
 [1]: http://phantomjs.org
 [2]: https://github.com/niklasb/dryscrape
 [3]: http://docs.python-requests.org
 [4]: http://docs.seleniumhq.org
+[5]: https://www.crummy.com/software/BeautifulSoup

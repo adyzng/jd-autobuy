@@ -80,7 +80,8 @@ class JDWrapper(object):
 		try:
 			self.browser = webdriver.PhantomJS('phantomjs.exe')
 		except Exception, e:
-			pass
+			print 'Phantomjs initialize failed :', e
+			exit(1)
 		
 		
 	@staticmethod
