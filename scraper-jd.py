@@ -1,7 +1,6 @@
 #!C:\Python27 python
 # -*- coding: utf-8 -*-
 
-
 #import re
 import bs4
 import requests
@@ -9,13 +8,18 @@ import requests.packages.urllib3
 requests.packages.urllib3.disable_warnings()
 
 import os
-import sys
 import time
 import json
 import random
 
+
 import argparse
 from selenium import webdriver
+
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 # get function name
 FuncName = lambda n=0: sys._getframe(n + 1).f_code.co_name
@@ -29,9 +33,9 @@ def tags_val(tag, key='', index=0):
 	if len(tag) == 0 or len(tag) <= index:
 		return ''
 	elif key:
-		return tag[index].get(key)
+		return tag[index].get(key).strip(' \t\r\n')
 	else:
-		return tag[index].text
+		return tag[index].text.strip(' \t\r\n')
 
 
 def tag_val(tag, key=''):
@@ -73,7 +77,7 @@ class JDWrapper(object):
 		self.sess = requests.Session()
 		self.sess.header = {
 			'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36',
-			'ContentType': 'application/x-www-form-urlencoded; charset=utf-8',
+			'ContentType': 'text/html; charset=utf-8',
 			'Connection' : 'keep-alive',
 		}
 		
@@ -301,7 +305,7 @@ class JDWrapper(object):
 			tags = soup.select('div#name h1')
 			if len(tags) == 0:
 				tags = soup.select('div.sku-name')
-			good_data['name'] = tags_val(tags)
+			good_data['name'] = tags_val(tags).strip(' \t\r\n')
 
 			# cart link
 			tags = soup.select('a#InitCartUrl')
@@ -440,32 +444,33 @@ class JDWrapper(object):
 		
 	def cart_detail(self):
 		# list all goods detail in cart
-		cart_url = 'http://cart.jd.com/cart.action'
+		cart_url = 'https://cart.jd.com/cart.action'
 		cart_header = u'购买    数量    价格        总价        商品'
 		cart_format = u'{0:8}{1:8}{2:12}{3:12}{4}'
 		
 		try:	
 			resp = self.sess.get(cart_url)
 			soup = bs4.BeautifulSoup(resp.text, "html.parser")
-
+			
 			print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++'
 			print u'{0} > 购物车明细'.format(time.ctime())
 			print cart_header
-
-			items = soup.select('div.item-form')
-			for item in items:
+			
+			for item in soup.select('div.item-form'):
 				check = tags_val(item.select('div.cart-checkbox input'), key='checked')
 				check = ' Y' if check else ' -'
 				count = tags_val(item.select('div.quantity-form input'), key='value')
 				price = tags_val(item.select('div.p-price strong'))		
 				sums  = tags_val(item.select('div.p-sum strong'))
 				gname = tags_val(item.select('div.p-name a'))
-				print cart_format.format(check, count, price, sums, gname)
+				#: ￥字符解析出错, 输出忽略￥
+				print cart_format.format(check, count, price[1:], sums[1:], gname)
 
 			t_count = tags_val(soup.select('div.amount-sum em'))
 			t_value = tags_val(soup.select('span.sumPrice em'))
+			print soup.select('span.sumPrice em')
 			print u'总数: {0}'.format(t_count)
-			print u'总额: {0}'.format(t_value)
+			print u'总额: {0}'.format(t_value[1:])
 
 		except Exception, e:
 			print 'Exp {0} : {1}'.format(FuncName(), e)
