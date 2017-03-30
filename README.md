@@ -4,7 +4,7 @@
 Python爬虫，自动登录京东网站，查询商品库存，价格，显示购物车详情等。<br/>
 可以指定抢购商品，自动购买下单，然后手动去京东付款就行。
 
-2017-03-28： 实现二维码扫码登陆，不在依赖PhantomJs.
+**实现二维码扫码登陆。**
 
 
 ## 运行环境
@@ -12,31 +12,17 @@ Python 2.7
 
 
 ## 第三方库
-- [Requests][3]: 简单好用，功能强大的Http请求库。唯一的一个非转基因的Python HTTP库，人类可以安全享用。
-- [selenium][4]: 一个浏览器自动化测试工具。本例主要用来执行PhantomJS，模拟登陆用。
-- [beautifulsoup4][5]: HTML文档格式化及便签选择器
+- [Requests][1]: 简单好用，功能强大的Http请求库
+- [beautifulsoup4][2]: HTML文档格式化及便签选择器
 
-Requests库只能爬静态页面，京东登录有时需验证码，有时不需要，而且证码验证码是靠JS动态生成，比较复杂尚未研究清楚。
-所以需要一个能执行JS的容器，来模拟登陆，登陆之后的其他请求使用Requests库来操作。<br/>
-有两个选择：
-- [PhantomJS][1]: 一个基于WebKit的无UI模拟浏览器，它全面支持web而不需浏览器支持。
-- [dryscrape][2]: 一个轻量级的Python开源爬虫库。可惜Windows平台不支持，在Linux下倒是一个很好的选择。
 
 
 ## 环境配置
 ``` Python
 pip install requests
-pip install selenium
 pip install beautifulsoup4
 ```
 
-PhantomJS是一个可执行文件，下载下来解压到%PATH%目录下，或者跟python.exe同级也行。
-``` Python
-try:
-	self.browser = webdriver.PhantomJS('phantomjs.exe')
-except Exception, e:
-	pass
-```
 
 ## 使用帮助
 ``` cmd
@@ -63,35 +49,33 @@ optional arguments:
 ## 实例输出
 ``` cmd
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Thu Aug 11 23:51:30 2016 > 登陆
-无验证码登陆
-登陆成功 ****
+Thu Mar 30 17:10:01 2017 > 请打开京东手机客户端，准备扫码登陆:
+201 : 二维码未扫描 ，请扫描二维码
+201 : 二维码未扫描 ，请扫描二维码
+201 : 二维码未扫描 ，请扫描二维码
+201 : 二维码未扫描 ，请扫描二维码
+202 : 请手机客户端确认登录
+200 : BADACIFYhf6fakfHvjiYTlwGzSp4EjFATN3Xw1ePR1hITtw0
+登陆成功
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Thu Aug 11 23:51:36 2016 > 商品详情
-编号：2567304
-库存：有货
-价格：2188.00
-名称：华为 HUAWEI WATCH 经典系列 智能手表（不锈钢三珠表带） 手表蓝牙通话 星河银
-链接：http://cart.jd.com/gate.action?pid=2567304&pcount=1&ptype=1
+Thu Mar 30 17:10:28 2017 > 商品详情
+编号：3133857
+库存：现货
+价格：6399.00
+名称：Apple iPhone 7 Plus (A1661) 128G 黑色 移动联通电信4G手机
+链接：http://cart.jd.com/gate.action?pid=3133857&pcount=1&ptype=1
 商品已成功加入购物车！
-购买数量：2567304 > 2
+购买数量：3133857 > 1
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Thu Aug 11 23:51:38 2016 > 购物车明细
+Thu Mar 30 17:10:30 2017 > 购物车明细
 购买    数量    价格        总价        商品
- Y      2       2188.00     4376.00     华为 HUAWEI WATCH 经典系列 智能手表（不锈钢三珠表带） 手表蓝牙通话 星河银
- -      1       169.00      169.00      【活动商品】小米（MI）小米手环2 心率监测 来电提醒
- -      1       199.00      199.00      小米（MI）小米手环2 心率监测 来电提醒
- -      1       69.00       69.00       LAMY凌美50MLT52黑色墨水
-总数: 2
-总额: 4376.00
+ Y      1       6399.00     6399.00     Apple iPhone 7 Plus (A1661) 128G 黑色 移动联通电信4G手机
+总数: 1
+总额: 6399.00
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Thu Aug 11 23:51:38 2016 > 订单详情
-应付款：￥4376.00
-收货人：*** 18*********
-寄送至： 北京*******************
-下单成功！订单号：212****1442
-请前往东京官方商城付款
+Thu Mar 30 17:10:30 2017 > 订单详情
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+...
 ```
 
 ## 注
@@ -99,8 +83,5 @@ Thu Aug 11 23:51:38 2016 > 订单详情
 如果您发现有Bug，Welcome to Pull Request.
 
 
-[1]: http://phantomjs.org
-[2]: https://github.com/niklasb/dryscrape
-[3]: http://docs.python-requests.org
-[4]: http://docs.seleniumhq.org
-[5]: https://www.crummy.com/software/BeautifulSoup
+[1]: http://docs.python-requests.org
+[2]: https://www.crummy.com/software/BeautifulSoup
