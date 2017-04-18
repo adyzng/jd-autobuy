@@ -1,7 +1,15 @@
-#!C:\Python27 python
 # -*- coding: utf-8 -*-
 
-#import re
+"""
+JD online shopping helper tool
+-----------------------------------------------------
+
+only support to login by QR code, 
+username / password is not working now.
+
+"""
+
+
 import bs4
 import requests
 import requests.packages.urllib3
@@ -118,7 +126,7 @@ class JDWrapper(object):
 			return False
 		return True
 
-	def need_auth_code(self, usr_name):
+	def _need_auth_code(self, usr_name):
 		# check if need auth code
 		# 
 		auth_dat = {
@@ -137,8 +145,7 @@ class JDWrapper(object):
 		print u'获取是否需要验证码失败'
 		return False
 
-
-	def get_auth_code(self, uuid):
+	def _get_auth_code(self, uuid):
 		# image save path
 		image_file = os.path.join(os.getcwd(), 'authcode.jfif')
 			
@@ -164,8 +171,7 @@ class JDWrapper(object):
 		os.system('start ' + image_file)
 		return str(raw_input('Auth Code: '))
 
-
-	def login_once(self, login_data):
+	def _login_once(self, login_data):
 		# url parameter
 		payload = {
 			'r': random.random(),
@@ -186,6 +192,84 @@ class JDWrapper(object):
 
 		return False
 
+	def _login_try(self):
+		""" login by username and password, but not working now.
+		
+		.. deprecated::
+			Use `login_by_QR`
+		"""
+		# get login page
+		#resp = self.sess.get(self.home)
+		print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+		print u'{0} > 登陆'.format(time.ctime())
+
+		try:
+			# 2016/09/17 PhantomJS can't login anymore
+			self.browser.get(self.home)
+			soup = bs4.BeautifulSoup(self.browser.page_source, "html.parser")
+			
+			# set cookies from PhantomJS
+			for cookie in self.browser.get_cookies():
+				self.sess.cookies[cookie['name']] = str(cookie['value'])
+
+			#for (k, v) in self.sess.cookies.items():
+			#	print '%s: %s' % (k, v)
+				
+			# response data hidden input == 9 ??. Changed 
+			inputs = soup.select('form#formlogin input[type=hidden]')
+			rand_name = inputs[-1]['name']
+			rand_data = inputs[-1]['value']
+			token = ''
+
+			for idx in range(len(inputs) - 1):
+				id = inputs[idx]['id']
+				va = inputs[idx]['value']
+				if   id == 'token':
+					token = va
+				elif id == 'uuid':
+					self.uuid = va
+				elif id == 'eid':
+					self.eid = va
+				elif id == 'sessionId':
+					self.fp = va
+			
+			auth_code = ''
+			if self.need_auth_code(self.usr_name):
+				auth_code = self.get_auth_code(self.uuid)	
+			else:
+				print u'无验证码登陆'
+			
+			login_data = {
+				'_t': token,
+				'authcode': auth_code,
+				'chkRememberMe': 'on',
+				'loginType': 'f',
+				'uuid': self.uuid,
+				'eid': self.eid,
+				'fp': self.fp,
+				'nloginpwd': self.usr_pwd,
+				'loginname': self.usr_name,
+				'loginpwd': self.usr_pwd,
+				rand_name : rand_data,
+			}
+			
+			login_succeed = self.login_once(login_data)
+			if login_succeed:
+				self.trackid = self.sess.cookies['TrackID']
+				print u'登陆成功 %s' % self.usr_name
+			else:		
+				print u'登陆失败 %s' % self.usr_name	
+
+			return login_succeed
+
+		except Exception, e:
+			print 'Exception:', e.message
+			raise
+		finally:
+			self.browser.quit()
+
+		return False
+	
 	
 	def login_by_QR(self):
 		# jd login by QR code
@@ -308,80 +392,6 @@ class JDWrapper(object):
 		except Exception as e:
 			print 'Exp:', e
 			raise
-
-		return False
-
-
-	def login_try(self):
-		# get login page
-		#resp = self.sess.get(self.home)
-		print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-		print u'{0} > 登陆'.format(time.ctime())
-
-		try:
-			# 2016/09/17 PhantomJS can't login anymore
-			self.browser.get(self.home)
-			soup = bs4.BeautifulSoup(self.browser.page_source, "html.parser")
-			
-			# set cookies from PhantomJS
-			for cookie in self.browser.get_cookies():
-				self.sess.cookies[cookie['name']] = str(cookie['value'])
-
-			#for (k, v) in self.sess.cookies.items():
-			#	print '%s: %s' % (k, v)
-				
-			# response data hidden input == 9 ??. Changed 
-			inputs = soup.select('form#formlogin input[type=hidden]')
-			rand_name = inputs[-1]['name']
-			rand_data = inputs[-1]['value']
-			token = ''
-
-			for idx in range(len(inputs) - 1):
-				id = inputs[idx]['id']
-				va = inputs[idx]['value']
-				if   id == 'token':
-					token = va
-				elif id == 'uuid':
-					self.uuid = va
-				elif id == 'eid':
-					self.eid = va
-				elif id == 'sessionId':
-					self.fp = va
-			
-			auth_code = ''
-			if self.need_auth_code(self.usr_name):
-				auth_code = self.get_auth_code(self.uuid)	
-			else:
-				print u'无验证码登陆'
-			
-			login_data = {
-				'_t': token,
-				'authcode': auth_code,
-				'chkRememberMe': 'on',
-				'loginType': 'f',
-				'uuid': self.uuid,
-				'eid': self.eid,
-				'fp': self.fp,
-				'nloginpwd': self.usr_pwd,
-				'loginname': self.usr_name,
-				'loginpwd': self.usr_pwd,
-				rand_name : rand_data,
-			}
-			
-			login_succeed = self.login_once(login_data)
-			if login_succeed:
-				self.trackid = self.sess.cookies['TrackID']
-				print u'登陆成功 %s' % self.usr_name
-			else:		
-				print u'登陆失败 %s' % self.usr_name	
-
-			return login_succeed
-
-		except Exception, e:
-			print 'Exception:', e.message
-			raise
-		finally:
-			self.browser.quit()
 
 		return False
 
@@ -542,8 +552,10 @@ class JDWrapper(object):
 			if tag is None or len(tag) == 0:
 				print u'添加到购物车失败'
 				return False
-
-			print u'{0}'.format(tags_val(tag))
+			
+			print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+			print u'{0} > 购买详情'.format(time.ctime())
+			print u'结果：{0}'.format(tags_val(tag))
 
 			# change count
 			self.buy_good_count(options.good, options.count)
@@ -576,11 +588,11 @@ class JDWrapper(object):
 			if rs.status_code == 200:
 				js = json.loads(rs.text)
 				if js.get('pcount'):
-					print u'购买数量：%s > %s' % (js['pid'], js['pcount'])
+					print u'数量：%s @ %s' % (js['pcount'], js['pid'])
 					return True
-
-			print u'设置购买数量失败'
-
+			else:
+				print u'购买 %d 失败' % count
+				
 		except Exception, e:
 			print 'Exp {0} : {1}'.format(FuncName(), e)
 
@@ -604,7 +616,7 @@ class JDWrapper(object):
 			
 			for item in soup.select('div.item-form'):
 				check = tags_val(item.select('div.cart-checkbox input'), key='checked')
-				check = ' Y' if check else ' -'
+				check = ' + ' if check else ' - '
 				count = tags_val(item.select('div.quantity-form input'), key='value')
 				price = tags_val(item.select('div.p-price strong'))		
 				sums  = tags_val(item.select('div.p-sum strong'))
