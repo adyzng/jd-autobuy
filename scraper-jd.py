@@ -60,7 +60,7 @@ class JDWrapper(object):
 	This class used to simulate login JD
 	'''
 	
-	def __init__(self, usr_name, usr_pwd):
+	def __init__(self, usr_name=None, usr_pwd=None):
 		# cookie info
 		self.trackid = ''
 		self.uuid = ''
@@ -386,7 +386,7 @@ class JDWrapper(object):
 		return False
 
 	
-	def good_stock(self, stock_id, good_count=1):
+	def good_stock(self, stock_id, good_count=1, area_id=None):
 		'''
 		33 : on sale, 
 		34 : out of stock
@@ -401,9 +401,9 @@ class JDWrapper(object):
 		stock_url = 'http://c0.3.cn/stocks' 
 
 		payload = {
-			'type': 'getstocks',
+			'type' : 'getstocks',
 			'skuIds' : str(stock_id),
-			'area' : '1_72_2799_0', # area change as needed
+			'area' : area_id or '1_72_2799_0', # area change as needed
 		}
 		
 		try:
@@ -429,7 +429,7 @@ class JDWrapper(object):
 		return (0, '')
 
 	
-	def good_detail(self, stock_id):
+	def good_detail(self, stock_id, area_id=None):
 		# return good detail
 		good_data = {
 			'id' : stock_id,
@@ -468,7 +468,7 @@ class JDWrapper(object):
 		good_data['price'] = self.good_price(stock_id)
 		
 		# good stock
-		good_data['stock'], good_data['stockName'] = self.good_stock(stock_id)
+		good_data['stock'], good_data['stockName'] = self.good_stock(stock_id=stock_id, area_id=area_id)
 		#stock_str = u'有货' if good_data['stock'] == 33 else u'无货'
 		
 		print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++'
@@ -517,7 +517,7 @@ class JDWrapper(object):
 			while good_data['stock'] != 33 and options.flush:
 				print u'<%s> <%s>' % (good_data['stockName'], good_data['name'])
 				time.sleep(options.wait / 1000.0)
-				good_data['stock'], good_data['stockName'] = self.good_stock(options.good)
+				good_data['stock'], good_data['stockName'] = self.good_stock(stock_id=options.good, area_id=options.area)
 				
 			# retry detail
 			#good_data = self.good_detail(options.good)
@@ -688,7 +688,7 @@ class JDWrapper(object):
 
 def main(options):
 	# 
-	jd = JDWrapper(options.username, options.password)
+	jd = JDWrapper()
 	if not jd.login_by_QR():
 		return
 
@@ -699,10 +699,12 @@ def main(options):
 if __name__ == '__main__':
 	# help message
 	parser = argparse.ArgumentParser(description='Simulate to login Jing Dong, and buy sepecified good')
-	parser.add_argument('-u', '--username', 
-						help='Jing Dong login user name', default='')
-	parser.add_argument('-p', '--password', 
-						help='Jing Dong login user password', default='')
+	#parser.add_argument('-u', '--username', 
+	#					help='Jing Dong login user name', default='')
+	#parser.add_argument('-p', '--password', 
+	#					help='Jing Dong login user password', default='')
+	parser.add_argument('-a', '--area', 
+						help='Area string, like: 1_72_2799_0 for Beijing', default='1_72_2799_0')	
 	parser.add_argument('-g', '--good', 
 						help='Jing Dong good ID', default='')
 	parser.add_argument('-c', '--count', type=int, 
@@ -716,7 +718,7 @@ if __name__ == '__main__':
 	parser.add_argument('-s', '--submit', 
 						action='store_true',
 						help='Submit the order to Jing Dong')
-						
+				
 	# example goods
 	hw_watch = '2567304'
 	iphone_7 = '3133851'
