@@ -1,0 +1,15 @@
+altgraph==0.14
+beautifulsoup4==4.6.0
+certifi==2017.7.27.1
+chardet==3.0.4
+dis3==0.1.1
+future==0.16.0
+idna==2.6
+macholib==1.8
+pefile==2017.9.3
+# PyInstaller用于生产exe文件，如不需要可以删除
+PyInstaller==3.3
+pypiwin32==219
+requests==2.18.4
+urllib3==1.22
+wheel==0.24.0
