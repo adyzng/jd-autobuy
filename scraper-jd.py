@@ -526,7 +526,26 @@ class JDWrapper(object):
 
                 # retry detail
                 # good_data = self.good_detail(options.good)
+                payload = {
+            'sku': options.good
+        }
+        # add qianggou
+        resp = self.sess.get("http://yushou.jd.com/youshouinfo.action", cookies=self.cookies,
+                             params=payload)
+        yushou_info = json.loads(resp.text)
+        print yushou_info
 
+        qianggou_url = yushou_info['url']
+
+        print qianggou_url
+
+        resp = self.sess.get("http:"+str(qianggou_url), cookies=self.cookies)
+
+        self.buy_good_count(options.good, options.count)
+
+        self.cart_detail()
+
+        return self.order_info(options.submit)
         # failed
         link = good_data['link']
         if good_data['stock'] != 33 or link == '':
