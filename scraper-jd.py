@@ -515,71 +515,80 @@ class JDWrapper(object):
         # stock detail
         good_data = self.good_detail(options.good)
 
-        # retry until stock not empty
-        if good_data['stock'] != 33:
-            # flush stock state
-            while good_data['stock'] != 33 and options.flush:
-                print u'<%s> <%s>' % (good_data['stockName'], good_data['name'])
-                time.sleep(options.wait / 1000.0)
-                good_data['stock'], good_data['stockName'] = self.good_stock(stock_id=options.good,
-                                                                             area_id=options.area)
+        if options.mode == 'qianggou':
 
-                # retry detail
-                # good_data = self.good_detail(options.good)
-                payload = {
-            'sku': options.good
-        }
-        # add qianggou
-        resp = self.sess.get("http://yushou.jd.com/youshouinfo.action", cookies=self.cookies,
-                             params=payload)
-        yushou_info = json.loads(resp.text)
-        print yushou_info
+            # qianggou mode, no need to check stock
+            payload = {
+                'sku': options.good
+            }
+            try:
+                resp = self.sess.get("http://yushou.jd.com/youshouinfo.action", cookies=self.cookies,
+                                     params=payload)
+                yushou_info = json.loads(resp.text)
+                qianggou_url = yushou_info['url']
 
-        qianggou_url = yushou_info['url']
+                resp = self.sess.get("http:" + str(qianggou_url), cookies=self.cookies)
+                soup = bs4.BeautifulSoup(resp.text, "html.parser")
+                tag = soup.select('h3.ftx-02')
+                if tag is None or len(tag) < 1:
+                    print u'抢购商品，添加购物车失败'
+                else:
+                    print u'抢购商品，添加购物车成功'
+            except Exception, e:
+                print u'抢购商品失败'
+                print 'Exp {0} : {1}'.format(FuncName(), e)
 
-        print qianggou_url
-
-        resp = self.sess.get("http:"+str(qianggou_url), cookies=self.cookies)
-
-        self.buy_good_count(options.good, options.count)
-
-        self.cart_detail()
-
-        return self.order_info(options.submit)
-        # failed
-        link = good_data['link']
-        if good_data['stock'] != 33 or link == '':
-            # print u'stock {0}, link {1}'.format(good_data['stock'], link)
-            return False
-
-        try:
-            # add to cart
-            resp = self.sess.get(link, cookies=self.cookies)
-            soup = bs4.BeautifulSoup(resp.text, "html.parser")
-
-            # tag if add to cart succeed
-            tag = soup.select('h3.ftx-02')
-            if tag is None:
-                tag = soup.select('div.p-name a')
-
-            if tag is None or len(tag) == 0:
-                print u'添加到购物车失败'
-                return False
-
-            print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-            print u'{0} > 购买详情'.format(time.ctime())
-            print u'结果：{0}'.format(tags_val(tag))
-
-            # change count
-            self.buy_good_count(options.good, options.count)
-
-        except Exception, e:
-            print 'Exp {0} : {1}'.format(FuncName(), e)
-        else:
             self.cart_detail()
             return self.order_info(options.submit)
+        # normal purchase mode
+        if options.mode == 'normal':
+            # retry until stock not empty
+            if good_data['stock'] != 33:
+                # flush stock state
+                while good_data['stock'] != 33 and options.flush:
+                    print u'<%s> <%s>' % (good_data['stockName'], good_data['name'])
+                    time.sleep(options.wait / 1000.0)
+                    good_data['stock'], good_data['stockName'] = self.good_stock(stock_id=options.good,
+                                                                                 area_id=options.area)
 
-        return False
+                    # retry detail
+                    # good_data = self.good_detail(options.good)
+
+            # failed
+            link = good_data['link']
+            if good_data['stock'] != 33 or link == '':
+                # print u'stock {0}, link {1}'.format(good_data['stock'], link)
+                return False
+
+            try:
+                # add to cart
+                resp = self.sess.get(link, cookies=self.cookies)
+                soup = bs4.BeautifulSoup(resp.text, "html.parser")
+
+                # tag if add to cart succeed
+                tag = soup.select('h3.ftx-02')
+                if tag is None:
+                    tag = soup.select('div.p-name a')
+
+                if tag is None or len(tag) == 0:
+                    print u'添加到购物车失败'
+                    return False
+
+                print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+                print u'{0} > 购买详情'.format(time.ctime())
+                print u'结果：{0}'.format(tags_val(tag))
+
+                # change count
+                self.buy_good_count(options.good, options.count)
+
+            except Exception, e:
+                print 'Exp {0} : {1}'.format(FuncName(), e)
+            else:
+                self.cart_detail()
+                return self.order_info(options.submit)
+
+            return False
+
 
     def buy_good_count(self, good_id, count):
         url = 'http://cart.jd.com/changeNum.action'
@@ -729,7 +738,7 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--area',
                         help='Area string, like: 1_72_2799_0 for Beijing', default='1_72_2799_0')
     parser.add_argument('-g', '--good',
-                        help='Jing Dong good ID', default='4993737')
+                        help='Jing Dong good ID', default='5413017')
     parser.add_argument('-c', '--count', type=int,
                         help='The count to buy', default=1)
     parser.add_argument('-w', '--wait',
@@ -738,6 +747,8 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--flush',
                         action='store_true',
                         help='Continue flash if good out of stock')
+    parser.add_argument('-m', '--mode',
+                        help='Purchashe mode, normal or qianggou', default='qianggou')
     parser.add_argument('-s', '--submit',
                         action='store_true',
                         help='Submit the order to Jing Dong')
@@ -752,7 +763,7 @@ if __name__ == '__main__':
     1. 请打开京东app，去除购物车中的选中商品（否则将会和抢购商品一同提交订单）
     2. 回到app首页，准备使用扫码登录
     """
-    print u'请输入商品ID(默认玩客云黑色):'
+    print u'请输入商品ID(默认未知):'
     input_good_id = raw_input()
     if len(input_good_id) > 0:
         options.good = input_good_id
