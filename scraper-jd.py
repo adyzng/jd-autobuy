@@ -534,6 +534,8 @@ class JDWrapper(object):
                     print u'抢购商品，添加购物车失败'
                 else:
                     print u'抢购商品，添加购物车成功'
+                # change count
+                self.buy_good_count(options.good, options.count)
             except Exception, e:
                 print u'抢购商品失败'
                 print 'Exp {0} : {1}'.format(FuncName(), e)
@@ -724,6 +726,9 @@ def main(options):
     if not jd.login_by_QR():
         return
 
+    print u'输入回车开始抢购'
+    raw_input()
+
     while not jd.buy(options) and options.flush:
         time.sleep(options.wait / 1000.0)
 
@@ -763,12 +768,26 @@ if __name__ == '__main__':
     1. 请打开京东app，去除购物车中的选中商品（否则将会和抢购商品一同提交订单）
     2. 回到app首页，准备使用扫码登录
     """
-    print u'请输入商品ID(默认未知):'
+    print u'请输入商品ID(默认5413017):'
     input_good_id = raw_input()
     if len(input_good_id) > 0:
         options.good = input_good_id
 
-    print u'请输入抢购数目(默认为1): '
+    print u'请输入购买模式，正常模式（normal），抢购模式（qianggou），默认采用抢购模式'
+    flag = True
+    while flag:
+        input_mode = raw_input()
+        if input_mode in ('normal', 'qianggou'):
+            options.mode = input_mode
+            flag = False
+        elif len(input_mode) == 0:
+            print u'采用默认抢购模式'
+            flag = False
+        else:
+            print u'请输入购买模式，正常模式（normal），抢购模式（qianggou），默认采用抢购模式'
+
+
+    print u'请输入购买数目(默认为1): '
     input_good_count = raw_input()
     if len(input_good_count) > 0:
         options.count = int(input_good_count)
