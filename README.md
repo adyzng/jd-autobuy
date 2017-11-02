@@ -2,12 +2,13 @@
 
 ## 京东抢购
 Python爬虫，自动登录京东网站，查询商品库存，价格，显示购物车详情等。<br/>
-可以指定抢购商品，自动购买下单，然后手动去京东付款就行。
+可以指定购买或者抢购预约过的商品，自动购买下单，然后手动去京东付款就行。
 
 
 ## chang log
 + 2017-03-30 实现二维码扫码登陆
 + 2017-06-27 [Golang版JD_AutoBuy](https://github.com/Adyzng/go-jd)
++ 2017-11-01 增加预约抢购的模式，区别普通的购买模式
 
 
 
@@ -18,6 +19,7 @@ Python 2.7
 ## 第三方库
 - [Requests][1]: 简单好用，功能强大的Http请求库
 - [beautifulsoup4][2]: HTML文档格式化及便签选择器
+- pyinstaller: 用于打包可执行文件（可以不安装）
 
 
 
@@ -47,6 +49,7 @@ optional arguments:
                         The count to buy
   -w WAIT, --wait WAIT  Flush time interval, unit MS
   -f, --flush           Continue flash if good out of stock
+  -m, --mode            Purchashe mode, normal or qianggou', default='qianggou'
   -s, --submit          Submit the order to Jing Dong
 ```
 
