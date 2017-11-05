@@ -528,6 +528,9 @@ class JDWrapper(object):
                 qianggou_url = yushou_info['url']
                 print yushou_info
                 resp = self.sess.get("http:" + str(qianggou_url), cookies=self.cookies)
+                if str(resp.text).find("您已成功预约过了，无需重复预约") != -1:
+                    print u'已经成功预约，但抢购未开始'
+                    return False
                 soup = bs4.BeautifulSoup(resp.text, "html.parser")
                 tag = soup.select('h3.ftx-02')
                 if tag is None or len(tag) < 1:
@@ -730,6 +733,8 @@ def main(options):
     if not jd.login_by_QR():
         return
 
+    good_data = jd.good_detail(options.good)
+    print u'<%s> <%s>' % (good_data['stockName'], good_data['name'])
     print u'输入回车开始抢购'
     raw_input()
 
@@ -747,7 +752,7 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--area',
                         help='Area string, like: 1_72_2799_0 for Beijing', default='19_1607_3155_0')
     parser.add_argument('-g', '--good',
-                        help='Jing Dong good ID', default='5413017')
+                        help='Jing Dong good ID', default='4993737')
     parser.add_argument('-c', '--count', type=int,
                         help='The count to buy', default=1)
     parser.add_argument('-w', '--wait',
@@ -772,7 +777,7 @@ if __name__ == '__main__':
     1. 请打开京东app，去除购物车中的选中商品（否则将会和抢购商品一同提交订单）
     2. 回到app首页，准备使用扫码登录
     """
-    print u'请输入商品ID(默认5413017):'
+    print u'请输入商品ID(默认4993737):'
     input_good_id = raw_input()
     if len(input_good_id) > 0:
         options.good = input_good_id
