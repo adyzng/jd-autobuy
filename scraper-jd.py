@@ -520,6 +520,10 @@ class JDWrapper(object):
             try:
                 resp = self.sess.get("http://yushou.jd.com/youshouinfo.action", cookies=self.cookies,
                                      params=payload)
+                # 未开始时会返回错误信息{"error":"pss info is null"}
+                if str(resp.text).find("error") != -1:
+                    print u'抢购未开始'
+                    return False
                 yushou_info = json.loads(resp.text)
                 qianggou_url = yushou_info['url']
                 print yushou_info
