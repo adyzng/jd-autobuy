@@ -512,11 +512,7 @@ class JDWrapper(object):
         return price
 
     def buy(self, options):
-        # stock detail
-        good_data = self.good_detail(options.good)
-
         if options.mode == 'qianggou':
-
             # qianggou mode, no need to check stock
             payload = {
                 'sku': options.good
@@ -526,24 +522,29 @@ class JDWrapper(object):
                                      params=payload)
                 yushou_info = json.loads(resp.text)
                 qianggou_url = yushou_info['url']
-
+                print yushou_info
                 resp = self.sess.get("http:" + str(qianggou_url), cookies=self.cookies)
                 soup = bs4.BeautifulSoup(resp.text, "html.parser")
                 tag = soup.select('h3.ftx-02')
                 if tag is None or len(tag) < 1:
-                    print u'抢购商品，添加购物车失败'
+                    print u'抢购商品，添加购物车失败', tag
+                    return False
                 else:
-                    print u'抢购商品，添加购物车成功'
+                    print u'抢购商品，添加购物车成功', tag
+                    self.cart_detail()
+                    if options.count > 1:
+                        self.buy_good_count(options.good, options.count)
+                    return self.order_info(options.submit)
                 # change count
-                self.buy_good_count(options.good, options.count)
             except Exception, e:
                 print u'抢购商品失败'
                 print 'Exp {0} : {1}'.format(FuncName(), e)
+                return False
 
-            self.cart_detail()
-            return self.order_info(options.submit)
         # normal purchase mode
         if options.mode == 'normal':
+            # stock detail
+            good_data = self.good_detail(options.good)
             # retry until stock not empty
             if good_data['stock'] != 33:
                 # flush stock state
@@ -590,7 +591,6 @@ class JDWrapper(object):
                 return self.order_info(options.submit)
 
             return False
-
 
     def buy_good_count(self, good_id, count):
         url = 'http://cart.jd.com/changeNum.action'
@@ -741,7 +741,7 @@ if __name__ == '__main__':
     # parser.add_argument('-p', '--password',
     #					help='Jing Dong login user password', default='')
     parser.add_argument('-a', '--area',
-                        help='Area string, like: 1_72_2799_0 for Beijing', default='1_72_2799_0')
+                        help='Area string, like: 1_72_2799_0 for Beijing', default='19_1607_3155_0')
     parser.add_argument('-g', '--good',
                         help='Jing Dong good ID', default='5413017')
     parser.add_argument('-c', '--count', type=int,
@@ -785,7 +785,6 @@ if __name__ == '__main__':
             flag = False
         else:
             print u'请输入购买模式，正常模式（normal），抢购模式（qianggou），默认采用抢购模式'
-
 
     print u'请输入购买数目(默认为1): '
     input_good_count = raw_input()
