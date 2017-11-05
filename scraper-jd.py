@@ -522,29 +522,29 @@ class JDWrapper(object):
                                      params=payload)
                 # 未开始时会返回错误信息{"error":"pss info is null"}
                 if str(resp.text).find("error") != -1:
-                    print u'抢购未开始'
+                    print u'{0} > 抢购未开始'.format(time.ctime())
                     return False
                 yushou_info = json.loads(resp.text)
                 qianggou_url = yushou_info['url']
                 print yushou_info
                 resp = self.sess.get("http:" + str(qianggou_url), cookies=self.cookies)
                 if str(resp.text).find("您已成功预约过了，无需重复预约") != -1:
-                    print u'已经成功预约，但抢购未开始'
+                    print u'{0} > 已经成功预约，但抢购未开始'.format(time.ctime())
                     return False
                 soup = bs4.BeautifulSoup(resp.text, "html.parser")
                 tag = soup.select('h3.ftx-02')
                 if tag is None or len(tag) < 1:
-                    print u'抢购商品，添加购物车失败', tag
+                    print u'{0} > 抢购商品，添加购物车失败'.format(time.ctime())
                     return False
                 else:
-                    print u'抢购商品，添加购物车成功', tag
+                    print u'{0} > 抢购商品，添加购物车成功'.format(time.ctime())
                     self.cart_detail()
                     if options.count > 1:
                         self.buy_good_count(options.good, options.count)
                     return self.order_info(options.submit)
                 # change count
             except Exception, e:
-                print u'抢购商品失败'
+                print u'{0} > 抢购商品失败'.format(time.ctime())
                 print 'Exp {0} : {1}'.format(FuncName(), e)
                 return False
 
