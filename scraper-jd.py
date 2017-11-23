@@ -324,9 +324,18 @@ class JDWrapper(object):
 					f.write(chunk)
 			
 			## scan QR code with phone
-			os.system('start ' + image_file)
+			if os.name == "nt": 
+				# for windows
+				os.system('start ' + image_file)
+			else:
+				if os.uname()[0] == "Linux":
+					# for linux platform
+					os.system("eog " + image_file)
+				else:
+					# for Mac platform
+					os.system("open " + image_file)
 
-			# step 3： check scan result
+			# step 3: check scan result
 			## mush have
 			self.headers['Host'] = 'qr.m.jd.com' 
 			self.headers['Referer'] = 'https://passport.jd.com/new/login.aspx'
@@ -408,7 +417,7 @@ class JDWrapper(object):
 		# http://c0.3.cn/stocks?callback=jQuery2289454&type=getstocks&skuIds=3133811&area=1_72_2799_0&_=1490694504044
 		#   jQuery2289454({"3133811":{"StockState":33,"freshEdi":null,"skuState":1,"PopType":0,"sidDely":"40","channel":1,"StockStateName":"现货","rid":null,"rfg":0,"ArrivalDate":"","IsPurchase":true,"rn":-1}})
 		# jsonp or json both work
-		stock_url = 'http://c0.3.cn/stocks' 
+		stock_url = 'https://c0.3.cn/stocks' 
 
 		payload = {
 			'type' : 'getstocks',
@@ -433,7 +442,7 @@ class JDWrapper(object):
 			return stock_stat, stock_stat_name
 
 		except Exception as e:
-			print 'Exception:', e
+			print 'Stocks Exception:', e
 			time.sleep(5)
 
 		return (0, '')
@@ -487,7 +496,7 @@ class JDWrapper(object):
 		print u'库存：{0}'.format(good_data['stockName'])
 		print u'价格：{0}'.format(good_data['price'])
 		print u'名称：{0}'.format(good_data['name'])
-		print u'链接：{0}'.format(good_data['link'])
+		#print u'链接：{0}'.format(good_data['link'])
 		
 		return good_data
 		
@@ -540,6 +549,10 @@ class JDWrapper(object):
 			return False
 
 		try:
+			# change buy count
+			if options.count != 1:
+				link = link.replace('pcount=1', 'pcount={0}'.format(options.count))
+
 			# add to cart
 			resp = self.sess.get(link, cookies = self.cookies)
 			soup = bs4.BeautifulSoup(resp.text, "html.parser")
@@ -555,10 +568,11 @@ class JDWrapper(object):
 			
 			print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++'
 			print u'{0} > 购买详情'.format(time.ctime())
+			print u'链接：{0}'.format(link)
 			print u'结果：{0}'.format(tags_val(tag))
 
-			# change count
-			self.buy_good_count(options.good, options.count)
+			# change count after add to shopping cart
+			#self.buy_good_count(options.good, options.count)
 			
 		except Exception, e:
 			print 'Exp {0} : {1}'.format(FuncName(), e)
