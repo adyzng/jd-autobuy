@@ -390,6 +390,14 @@ class JDWrapper(object):
 				print u'二维码登陆校验失败: %u' % resp.status_code
 				return False
 			
+			## 京东有时候会认为当前登录有危险，需要手动验证
+			## url: https://safe.jd.com/dangerousVerify/index.action?username=...
+			res = json.loads(resp.text)
+			if not resp.headers.get('P3P'):
+				if not res.url:
+					print u'需要手动安全验证: {0}'.format(res.url)
+					return false
+			
 			## login succeed
 			self.headers['P3P'] = resp.headers.get('P3P')
 			for k, v in resp.cookies.items():
