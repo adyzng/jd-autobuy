@@ -394,9 +394,13 @@ class JDWrapper(object):
 			## url: https://safe.jd.com/dangerousVerify/index.action?username=...
 			res = json.loads(resp.text)
 			if not resp.headers.get('P3P'):
-				if not res.url:
-					print u'需要手动安全验证: {0}'.format(res.url)
-					return false
+				if res.has_key('url'):
+					print u'需要手动安全验证: {0}'.format(res['url'])
+					return False
+				else:
+					print_json(res)
+					print u'登陆失败!!'
+					return False
 			
 			## login succeed
 			self.headers['P3P'] = resp.headers.get('P3P')
