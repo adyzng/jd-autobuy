@@ -1,28 +1,3 @@
-
-Skip to content
-Pull requests
-Issues
-Marketplace
-Explore
-@zstu-lly
-
-2
-14
-
-    7
-
-zstu-lly/JD_Robot
-Code
-Issues 0
-Pull requests 0
-Projects 0
-Wiki
-Security
-Insights
-Settings
-JD_Robot/spider.py
-Fetching contributors…
-559 lines (482 sloc) 20.9 KB
 import argparse
 import os
 import pickle
@@ -580,18 +555,3 @@ if __name__ == '__main__':
 
     while not spider.buy(options) and options.flush:
         time.sleep(options.wait / 1000.0)
-
-    © 2019 GitHub, Inc.
-    Terms
-    Privacy
-    Security
-    Status
-    Help
-
-    Contact GitHub
-    Pricing
-    API
-    Training
-    Blog
-    About
-
